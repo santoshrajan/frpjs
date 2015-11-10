@@ -1,0 +1,19 @@
+{
+  "name": "frpjs",
+  "version": "0.0.1",
+  "description": "Functional Reeactive Programming JavaScript Library",
+  "main": "lib/frp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Functional",
+    "Reactive",
+    "Programming",
+    "JavaScript",
+    "Library",
+    "Event"
+  ],
+  "author": "Santosh Rajan",
+  "license": "MIT"
+}
