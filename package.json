@@ -1,6 +1,6 @@
 {
   "name": "frpjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Functional Reeactive Programming JavaScript Library",
   "main": "lib/frp.js",
   "scripts": {
@@ -14,6 +14,10 @@
     "Library",
     "Event"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/santoshrajan/frpjs"
+  },
   "author": "Santosh Rajan",
   "license": "MIT"
 }
