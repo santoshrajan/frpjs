@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+
+<!-- $ browserify -r frpjs -i socket.io -i https -i fs -o frpjs-bundle.js -->
+<script src="js/frpjs-bundle.js"></script>
+
+<script>
+
+var socket         = io(),
+    frp            = require('frpjs'),
+    input          = frp.dom.select('input'),
+    submitEvents   = frp.dom.onSubmit(frp.dom.select('form')),
+    filteredEvents = frp.filter(submitEvents, () => !!input.value.length)
+
+filteredEvents(e => {
+    socket.emit('chat message', input.value)
+    input.value = ''
+    e.preventDefault()
+})
+
+function appendMessage(msg) {
+    var li = document.createElement('li')
+    li.textContent = msg
+    frp.dom.select('ul').appendChild(li)
+}
+
+socket.on('chat message', appendMessage)
+
+</script>
+
+  </body>
+</html>
