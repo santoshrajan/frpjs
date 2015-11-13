@@ -1,3 +1,5 @@
+// Node Server for socket.io chat example using frpjs
+
 var express = require('express'),
     app = express(),
     http = require('http').Server(app),

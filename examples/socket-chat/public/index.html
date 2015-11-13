@@ -38,13 +38,9 @@ filteredEvents(e => {
     e.preventDefault()
 })
 
-function appendMessage(msg) {
-    var li = document.createElement('li')
-    li.textContent = msg
-    frp.dom.select('ul').appendChild(li)
-}
-
-socket.on('chat message', appendMessage)
+socket.on('chat message', msg =>
+    frp.dom.select('ul').appendChild(frp.dom.create('li', msg))
+)
 
 </script>
 

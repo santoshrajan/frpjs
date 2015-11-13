@@ -1,6 +1,6 @@
-require=(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({"frpjs":[function(require,module,exports){
-module.exports=require('XLcxgT');
-},{}],"XLcxgT":[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+
+},{}],"frpjs":[function(require,module,exports){
 var https = require('https'),
     fs = require('fs'),
     io = require('socket.io'),
@@ -84,6 +84,12 @@ FRP.dom.select = function(selector) {
     return document.querySelector(selector)
 }
 
+FRP.dom.create = function(tagname, text) {
+    var elem = document.createElement(tagname)
+    if (text) elem.textContent = text
+    return elem
+}
+
 FRP.dom.on = function(element, name, useCapture) {
     return function(next) {
         element.addEventListener(name, next, !!useCapture)
@@ -130,7 +136,7 @@ FRP.fs.readFile = function(filename) {
     }
 }
 
-// Socket.io functions
+// Socket.io functions for Node
 
 FRP.io = {}
 FRP.socket = {}
@@ -146,16 +152,15 @@ FRP.io.on = function(name) {
     }
 }
 
+FRP.io.emit = function(name, msg) {
+    io.emit(name, msg)
+}
+
 FRP.socket.on = function(socket, name) {
     return function(next) {
         socket.on(name, next)
     }
 }
 
-
-
 module.exports = FRP
-},{"https":1,"fs":1,"socket.io":1}],1:[function(require,module,exports){
-
-},{}]},{},[])
-;
+},{"fs":1,"https":1,"socket.io":1}]},{},[]);
