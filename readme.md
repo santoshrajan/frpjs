@@ -57,12 +57,11 @@ Next, create a connection Event.
 connectionEvent       = frp.io.on('connection')
 ```
 
-frpjs Events are just functions that take a callback as their argument. The callbacks are called with the value of the Event, whenever an event occurs. Events are not activated when they are created. They are activated when you you call the Event with a callback.
+frpjs Events are just functions that take a callback as their argument. The callbacks are called with the value of the Event, whenever an event occurs. Events are not activated when they are created. They are activated when you call the Event with a callback.
 
 We then create a function that takes a socket as argument and returns a 'chat message' Event.
 ```
 connectionToSockEvent = socket => frp.socket.on(socket, 'chat message')
-
 ```
 
 Now we bind the 'connection' Event to the 'chat message' Event.
@@ -177,7 +176,7 @@ FRP.stepper(eventStream, initial)
 // Returns a behaviour. Call the behaviour for the last value of the event.
 ```
 
-### DOM functions
+#### DOM functions
 
 ```
 FRP.dom.select(selector)
@@ -192,7 +191,6 @@ FRP.dom.on(element, name, useCapture)
 
 FRP.dom.onClick(element, useCapture)
 // Returns a new 'click' Event Stream on the given element
-
 
 FRP.dom.onChange(element, useCapture)
 // Returns a new 'change' Event Stream on the given element
