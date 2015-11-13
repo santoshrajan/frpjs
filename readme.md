@@ -76,3 +76,155 @@ msgEvent is the new Event created by binding the above two Events. It is importa
 msgEvent(msg => frp.io.emit('chat message', msg))
 ```
 
+##### The client side code
+
+```
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+
+<!-- $ browserify -r frpjs -i socket.io -i https -i fs -o frpjs-bundle.js -->
+<script src="js/frpjs-bundle.js"></script>
+
+<script>
+
+var socket         = io(),
+    frp            = require('frpjs'),
+    input          = frp.dom.select('input'),
+    submitEvents   = frp.dom.onSubmit(frp.dom.select('form')),
+    filteredEvents = frp.filter(submitEvents, () => !!input.value.length)
+
+filteredEvents(e => {
+    socket.emit('chat message', input.value)
+    input.value = ''
+    e.preventDefault()
+})
+
+socket.on('chat message', msg =>
+    frp.dom.select('ul').appendChild(frp.dom.create('li', msg))
+)
+
+</script>
+
+  </body>
+</html>
+```
+
+We create a submit Event first
+```
+submitEvents   = frp.dom.onSubmit(frp.dom.select('form'))
+```
+
+Next we apply a filter on the `submit` events, so that only valid submissions (input field is not empty) are allowed. The filter returns a new filtered Event.
+```
+filteredEvents = frp.filter(submitEvents, () => !!input.value.length)
+```
+
+Then we insert every chat message into the DOM.
+```
+socket.on('chat message', msg =>
+    frp.dom.select('ul').appendChild(frp.dom.create('li', msg))
+)
+```
+
+### frpjs docs - Available functions
+
+#### Core frpjs functions
+
+```
+FRP.map(eventStream, valueTransform)
+// Takes an eventStream and a function that transforms the value of the Event.
+// Returns a new Event that emits the transformed Value
+
+FRP.bind(eventStream, valueToEvent)
+// Binds an eventStream to a new EventStream. Function valueToEvent is called
+// with the event value. Returns a new Event Stream.
+
+FRP.filter(eventStream, predicate)
+// Filters an Event Stream. Predicate is called with every value.
+
+FRP.reject(eventStream, predicate)
+// Opposite of filter
+
+FRP.foldp(eventStream, step, initial)
+// Is the 'reduce' function for every event in the stream. step function
+// is called accumulator and the current value.
+
+FRP.hub(eventStream)
+// Returns a new Event hub. Every time you call the hub with a listener, 
+// the listener is added to the hub and called with the event value
+
+FRP.stepper(eventStream, initial) 
+// Returns a behaviour. Call the behaviour for the last value of the event.
+```
+
+### DOM functions
+
+```
+FRP.dom.select(selector)
+// Same as document.querySelector
+
+FRP.dom.create(tagname[, text])
+// Creates an element with the given tagname. Optional text will be added
+// to the textContent of created element
+
+FRP.dom.on(element, name, useCapture)
+// Return a new DOM Event Stream on the given element
+
+FRP.dom.onClick(element, useCapture)
+// Returns a new 'click' Event Stream on the given element
+
+
+FRP.dom.onChange(element, useCapture)
+// Returns a new 'change' Event Stream on the given element
+
+FRP.dom.onSubmit(element, useCapture)
+// Returns a new 'submit' Event Stream on the given element
+```
+
+#### Nodejs functions
+```
+FRP.https.get(url)
+// Will return an 'end' event. Callback is called with data
+
+FRP.fs.readFile(filename)
+// Will return a an EventStream. Callback is called with data
+```
+
+#### Socket.io functions for Node
+
+```
+FRP.io.connectToServer(http)
+// connect socket io to the http server
+
+FRP.io.on = function(name)
+// wrapper for io.on
+
+FRP.io.emit(name, msg)
+// wrapper for io.emit
+
+FRP.socket.on(socket, name)
+// wrapper for socket.on
+```
+
+
+
