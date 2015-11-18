@@ -1,13 +1,13 @@
 {
-  "name": "socket-chat",
+  "name": "Tax Calculator",
   "version": "0.0.1",
-  "description": "Socket IO chat example using frpjs",
+  "description": "Tax Calculator example using frpjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
-  "author": "Santosh Rajan",
+  "author": "Anil Pradyumna Chakicherla",
   "license": "MIT",
   "dependencies": {
     "express": "^4.13.3",

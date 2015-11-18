@@ -1,5 +1,3 @@
-// Node Server for socket.io chat example using frpjs
-
 var express = require('express'),
     app = express(),
     http = require('http').Server(app),
@@ -15,6 +13,6 @@ var connectionEvent       = frp.io.on('connection'),
 
 msgEvent(msg => frp.io.emit('chat message', msg))
 
-http.listen(3000, function(){
-  console.log('listening on *:3000')
+http.listen(3010, function(){
+  console.log('listening on *:3010')
 })
