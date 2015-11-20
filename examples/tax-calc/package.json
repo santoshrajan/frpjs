@@ -1,6 +1,6 @@
 {
   "name": "Tax Calculator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Tax Calculator example using frpjs",
   "main": "index.js",
   "scripts": {
