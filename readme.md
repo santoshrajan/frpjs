@@ -15,7 +15,7 @@ You need socket.io and browserify installed globally.
 $ npm install frpjs --save
 ```
 
-For browser, create 'frpjs-bundle.js'
+For browser, use 'frpjs-bundle.js' in the lib folder or create 'frpjs-bundle.js' using browserify.
 ```
 $ browserify -r frpjs -i socket.io -i https -i fs -o frpjs-bundle.js
 ```
