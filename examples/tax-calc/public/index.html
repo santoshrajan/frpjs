@@ -5,10 +5,15 @@
 <body>
   Test Home page to calculate the tax of a country through the years.
   <div id ="Tax-Calculator">
-    <p>Enter the Tax value<textarea></textarea></p>
+
     <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+      <input id="m" autocomplete="off" /><button>Calculate</button>
     </form>
+    <ul id="Totals"></ul>
+    <script src="js/frpjs-bundle.js"></script>
+    <script>
+      var frp = require('frpjs'),input = frp.dom.select('input'),
+    </script>
   </div>
 </body>
 </html>
