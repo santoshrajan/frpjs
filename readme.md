@@ -174,6 +174,9 @@ FRP.hub(eventStream)
 
 FRP.stepper(eventStream, initial) 
 // Returns a behaviour. Call the behaviour for the last value of the event.
+
+FRP.throttle = function(eventStream, ms)
+// Throttle an EventStream to every ms milliseconds
 ```
 
 #### DOM functions
@@ -197,6 +200,10 @@ FRP.dom.onChange(element, useCapture)
 
 FRP.dom.onSubmit(element, useCapture)
 // Returns a new 'submit' Event Stream on the given element
+
+FRP.dom.onResizeWindow = function([throttle])
+// Returns a window resize event Stream. Optional throttle will throttle the 
+// eventStream to every 'throttle' milliseconds.
 ```
 
 #### Nodejs functions
