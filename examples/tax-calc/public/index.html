@@ -12,7 +12,11 @@
     <ul id="Totals"></ul>
     <script src="js/frpjs-bundle.js"></script>
     <script>
-      var frp = require('frpjs'),input = frp.dom.select('input'),
+      var frp = require('frpjs'),
+          input = frp.dom.select('input'),
+          submitEvents = frp.dom.onSubmit(frp.dom.select('form')),
+          
+
     </script>
   </div>
 </body>
