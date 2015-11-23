@@ -31,7 +31,7 @@ var socket         = io(),
     input          = frp.dom.select('input'),
     submitEvents   = frp.dom.onSubmit(frp.dom.select('form')),
     filteredEvents = frp.filter(submitEvents, () => !!input.value.length)
-
+      
 filteredEvents(e => {
     socket.emit('chat message', input.value)
     input.value = ''
