@@ -185,6 +185,9 @@ FRP.throttle = function(eventStream, ms)
 FRP.dom.select(selector)
 // Same as document.querySelector
 
+FRP.dom.selectAll(selector)
+// Same as document.querySelectorAll
+
 FRP.dom.create(tagname[, text])
 // Creates an element with the given tagname. Optional text will be added
 // to the textContent of created element
@@ -206,7 +209,22 @@ FRP.dom.onResizeWindow = function([throttle])
 // eventStream to every 'throttle' milliseconds.
 ```
 
+#### XHR functions
+
+```
+FRP.xhr.get(url)
+// Gets the url. Call the returned event with a callback
+// Callback is called with value. Value can be on of following
+// 1. responseText, 2. JSON Object if content type is application/json
+// 3. Error Object (check instanceof Error)
+
+FRP.xhr.post(url, body)
+// if body is a JSON object type application/json is posted.
+// response works like get above
+```
+
 #### Nodejs functions
+
 ```
 FRP.https.get(url)
 // Will return an 'end' event. Callback is called with data
