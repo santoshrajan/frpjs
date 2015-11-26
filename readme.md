@@ -237,7 +237,7 @@ FRP.fs.readFile(filename)
 
 ```
 FRP.io.connectToServer(http)
-// connect socket io to the http server
+// connect socket io to the http server. Returns 'io'
 
 FRP.io.on = function(name)
 // wrapper for io.on
