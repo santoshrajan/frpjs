@@ -24,6 +24,7 @@
     "socket.io": "^1.3.7"
   },
   "devDependencies": {
-    "babel-cli": "^6.5.1"
+    "babel-cli": "^6.5.1",
+    "babel-preset-es2015": "^6.5.0"
   }
 }
