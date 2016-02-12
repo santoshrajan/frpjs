@@ -1,6 +1,7 @@
 // Nodejs functions
 
-const https = require('https'),
+const FRP   = require('FRP'),
+      https = require('https'),
       fs    = require('fs'),
       Node  = {}
 

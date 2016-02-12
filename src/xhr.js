@@ -39,4 +39,4 @@ XHR.post = function(url, body) {
     }
 }
 
-module.exports = FRP
+module.exports = XHR
