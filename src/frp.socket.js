@@ -1,6 +1,6 @@
-// Socket.io functions for Node
+// Socket.io functions
 
-const io = require('socket.io'),
+const io     = require('socket.io'),
       Socket = {}
 
 Socket.io.connectToServer = function(http) {
@@ -24,4 +24,4 @@ Socket.socket.on = function(socket, name) {
     }
 }
 
-module.exports = Socket
+export default Socket

@@ -1,7 +1,6 @@
 // Nodejs functions
 
-const FRP   = require('FRP'),
-      https = require('https'),
+const https = require('https'),
       fs    = require('fs'),
       Node  = {}
 
@@ -28,4 +27,4 @@ Node.fs.readFile = function(filename) {
     }
 }
 
-module.exports = Node
+export default Node

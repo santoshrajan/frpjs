@@ -1,7 +1,6 @@
 // XHR functions
 
-const FRP = require("frp"),
-      XHR = {}
+const XHR = {}
 
 XHR.request = function(next) {
     let request = new XMLHttpRequest()
@@ -39,4 +38,4 @@ XHR.post = function(url, body) {
     }
 }
 
-module.exports = XHR
+export default XHR

@@ -94,4 +94,4 @@ FRP.throttle = function(eventStream, ms) {
     })
 }
 
-module.exports = FRP
+export default FRP

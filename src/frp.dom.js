@@ -1,7 +1,6 @@
 // DOM functions
 
-const FRP = require("frp"),
-      DOM = {}
+const DOM = {}
 
 DOM.select = function(selector) {
     return document.querySelector(selector)
@@ -35,14 +34,4 @@ DOM.onSubmit = function(element, useCapture) {
     return DOM.on(element, 'submit', !!useCapture)
 }
 
-DOM.onResizeWindow = function(throttle) {
-    let resizeEvents = DOM.on(window, 'resize')
-    if (throttle) resizeEvents = FRP.throttle(resizeEvents, throttle)
-    return function(next) {
-        resizeEvents(function() {
-            next({width: window.innerWidth, height: window.innerHeight})
-        })
-    }
-}
-
-module.exports = DOM
+export default DOM

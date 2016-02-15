@@ -2,7 +2,7 @@
   "name": "frpjs",
   "version": "0.1.0",
   "description": "Functional Reactive Programming JavaScript Library",
-  "main": "lib/frp.js",
+  "main": "lib/frp.core.js",
   "scripts": {
     "build": "babel src -d lib"
   },
