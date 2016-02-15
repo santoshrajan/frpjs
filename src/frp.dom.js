@@ -38,7 +38,7 @@ DOM.touchStart = function(element, useCapture) {
     return DOM.on(element, 'touchstart', !!useCapture)
 }
 
-DOM.touchMove = function(element, useCature) {
+DOM.touchMove = function(element, useCapture) {
     return DOM.on(element, 'touchmove', !!useCapture)
 }
 
