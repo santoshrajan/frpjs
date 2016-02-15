@@ -186,10 +186,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (container, slideWidth, slideHeight) {
-    var view = new SwipeView(container, slideWidth, slideHeight);
-
-    view.setupStyles();
-
     var stream$ = _frpjs2.default.compose(_dom2.default.touchStart(container), _frpjs2.default.merge(_dom2.default.touchMove(container)), _frpjs2.default.merge(_dom2.default.touchEnd(container)), _frpjs2.default.map(function (event) {
         return {
             type: event.type,
@@ -205,6 +201,7 @@ exports.default = function (container, slideWidth, slideHeight) {
         return curr;
     }, { slideIndex: 0 }));
 
+    var view = new SwipeView(container, slideWidth, slideHeight);
     stream$(function (event) {
         return activateEventStream(event, view);
     });
@@ -221,25 +218,27 @@ var _dom2 = _interopRequireDefault(_dom);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function activateEventStream(event, view) {
-    if (event.type == "touchmove") {
-        if (view.canSlideLeft(event) || view.canSlideRight(event)) {
-            var distance = -(event.slideIndex * view.slideWidth) + event.displacement;
-            view.move(distance);
-        } else if (view.isPullingEdge(event)) {
-            var distance = -(event.slideIndex * view.slideWidth) + view.edgePadding / view.slideWidth * event.displacement;
-            view.move(distance);
-        }
+    if (event.type == "touchmove") handleTouchMove(event, view);else if (event.type == "touchend") handleTouchEnd(event, view);
+}
+
+function handleTouchMove(event, view) {
+    if (view.canSlideLeft(event) || view.canSlideRight(event)) {
+        var distance = -(event.slideIndex * view.slideWidth) + event.displacement;
+        view.move(distance);
+    } else if (view.isPullingEdge(event)) {
+        var distance = -(event.slideIndex * view.slideWidth) + view.edgePadding / view.slideWidth * event.displacement;
+        view.move(distance);
+    }
+}
+
+function handleTouchEnd(event, view) {
+    if (view.hasCrossedMidPoint(event) || view.isFlicked(event)) {
+        if (view.canSlideRight(event)) event.slideIndex++;else if (view.canSlideLeft(event)) event.slideIndex--;
     }
 
-    if (event.type == "touchend") {
-        if (view.hasCrossedMidPoint(event) || view.isFlicked(event)) {
-            if (view.canSlideRight(event)) event.slideIndex++;else if (view.canSlideLeft(event)) event.slideIndex--;
-        }
-
-        var distance = -(event.slideIndex * view.slideWidth);
-        var time = view.isFlicked(event) ? 150 : 300;
-        view.animate(distance, time);
-    }
+    var distance = -(event.slideIndex * view.slideWidth);
+    var time = view.isFlicked(event) ? 150 : 300;
+    view.animate(distance, time);
 }
 
 function SwipeView(container, slideWidth, slideHeight) {
@@ -252,6 +251,8 @@ function SwipeView(container, slideWidth, slideHeight) {
 
     this.numSlides = this.slides.length;
     this.edgePadding = this.slideWidth / 10;
+
+    this.setupStyles();
 }
 
 SwipeView.prototype.setupStyles = function () {
