@@ -63,7 +63,7 @@ FRP.merge = function(eventStreamA) {
 }
 
 FRP.compose = function(eventStream, ...operations) {
-    if (!operations) return eventStream
+    if (operations.length == 0) return eventStream
 
     let operation = operations.shift()
     return FRP.compose(operation(eventStream), ...operations)
