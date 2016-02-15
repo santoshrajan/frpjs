@@ -66,7 +66,7 @@ FRP.compose = function(eventStream, ...operations) {
     if (!operations) return eventStream
 
     let operation = operations.shift()
-    return compose(operation(eventStream), ...operations)
+    return FRP.compose(operation(eventStream), ...operations)
 }
 
 FRP.stepper = function (eventStream, initial) {
