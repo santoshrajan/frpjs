@@ -15,7 +15,7 @@ $ npm install frpjs --save
 
 #### Example: swipeview
 
-Swipeview.js is a library that uses frpjs for building smooth touch-based content sliders for mobile devices. See the [source code](examples/swipeview/swipeview.js) or [try it out on a mobile browser](http://santoshrajan.com/frpjs/swipeview/).
+Swipeview.js is a library that uses frpjs for building smooth touch-based content sliders for mobile devices. See the [source code here](examples/swipeview/swipeview.js) or [try it out on a mobile browser](http://santoshrajan.com/frpjs/swipeview/).
 
 **Usage**
 
@@ -45,7 +45,7 @@ swipeview(container)
 
 Swipeview composes touch events on the container element using various core frp primitives and activates the composed event stream through an activation function.
 
-The core logic is placed inside a single `compose` function:
+The core logic is placed inside a single `compose`:
 
 ```
 let stream$ = frp.compose(
@@ -70,27 +70,32 @@ let stream$ = frp.compose(
 )
 ```
 
-First, we create touchstart, touchmove and touchend event streams on the container element and combine them into a single stream using merge.
+First, create touchstart, touchmove and touchend event streams on the container element and combine them into a single stream using merge.
 
 ```
+...
     dom.touchStart(container),
     frp.merge(dom.touchMove(container)),
     frp.merge(dom.touchEnd(container)),
+...
 ```
 
-Then, map over the event stream and pick out the event type, x position and timestamp from each event.
+Then, map over the combined event stream and pick out the event type, x position and timestamp from each event.
 
 ```
+...
     frp.map(event => ({
         type: event.type,
         pageX: getPageX(event),
         time: event.timeStamp
     })),
+...
 ```
 
-Finally, using fold, copy the start x position and start time from each touchstart to their corresponding touchmove and touchend events. Calculate the current displacement and add a slideIndex to hold the index of the current slide.
+Finally, using fold, copy the start x position and start time from each touchstart to their corresponding touchmove and touchend events. Calculate the current displacement and add a `slideIndex` to hold the index of the current slide.
 
 ```
+...
     frp.fold((prev, curr) => {
         curr.startX = (curr.type == "touchstart") ? curr.pageX : prev.startX
         curr.startTime = (curr.type == "touchstart") ? curr.time : prev.startTime
@@ -99,16 +104,17 @@ Finally, using fold, copy the start x position and start time from each touchsta
 
         return curr
     }, { slideIndex: 0 })
+...
 ```
 
-The composed event stream is then activated using an activation function. The activation function handles DOM updates and takes a view object that holds references to the container, slider and individual slides.
+The composed event stream is then activated using an activation function. The activation function takes in a view object and handles the DOM updates. The view object holds references to the container, slider and individual slide elements.
 
 ```
 const view = new SwipeView(container, slideWidth, slideHeight)
 stream$(event => activateEventStream(event, view))
 ```
 
-Inside the activation function, based on the event type, different scenarios -- such as swiping, flicking, pulling on slider edges -- are handled and corresponding changes are made to the slider element.
+Inside the activation function, based on the event type, different scenarios -- such as swiping, flicking, pulling the slider edge -- are handled and appropriate changes are made to the DOM.
 
 ```
 function activateEventStream(event, view) {
