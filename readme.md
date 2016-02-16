@@ -2,147 +2,121 @@
 
 ## Functional Reactive Programming Library for JavaScript
 
-### Wrapper functions for DOM, nodejs, socket.io
-
-Functional Reactive Programming, is an evented programming model originally implemented in Haskell. The FRP model postulates Event Streams as continuous rather than descrete. Event streams have values that change over time. FRP allows you to modify those streams of values. The motivation for implementing FRP in JavaScript is the talk by Conal Elliot at Lambda Jam 2015. 
+Functional Reactive Programming, is an evented programming model originally implemented in Haskell. The FRP model postulates Event Streams as continuous rather than discrete. Event streams have values that change over time. FRP allows you to modify those streams of values. The motivation for implementing FRP in JavaScript is the talk by Conal Elliot at Lambda Jam 2015. 
 [The Essence and Origins of Functional Reactive Programming](https://www.youtube.com/watch?v=j3Q32brCUAI)
 
 #### Install
 
-You need socket.io and browserify installed globally.
+Install using npm
 
 ```
 $ npm install frpjs --save
 ```
 
-For browser, use 'frpjs-bundle.js' in the lib folder or create 'frpjs-bundle.js' using browserify.
-```
-$ browserify -r frpjs -i socket.io -i https -i fs -o frpjs-bundle.js
-```
+#### Example: swipeview
 
-#### The [socket.io chat example](http://socket.io/get-started/chat/) using frpjs
+Swipeview.js is a library that uses frpjs for building smooth touch-based content sliders for mobile devices. See the [source code](examples/swipeview/swipeview.js) or [try it out on a mobile browser](http://santoshrajan.com/frpjs/swipeview/).
 
-Compare the socket.io chat example to the code give below
+**Usage**
 
-```
-// Node Server for socket.io chat example using frpjs
-
-var express = require('express'),
-    app = express(),
-    http = require('http').Server(app),
-    frp = require('frpjs')
-
-app.use(express.static('public'))
-
-frp.io.connectToServer(http)
-
-var connectionEvent       = frp.io.on('connection'),
-    connectionToSockEvent = socket => frp.socket.on(socket, 'chat message')
-    msgEvent              = frp.bind(connectionEvent, connectionToSockEvent)
-
-msgEvent(msg => frp.io.emit('chat message', msg))
-
-http.listen(3000, function(){
-  console.log('listening on *:3000')
-})
-```
-
-First Connect socket.io to the http server.
-```
-frp.io.connectToServer(http)
+Create a div structure as shown below. The `container` div is the visual container, `slider` holdes the individual `slides` and moves underneath the container.
 
 ```
-Next, create a connection Event.
-```
-connectionEvent       = frp.io.on('connection')
-```
-
-frpjs Events are just functions that take a callback as their argument. The callbacks are called with the value of the Event, whenever an event occurs. Events are not activated when they are created. They are activated when you call the Event with a callback.
-
-We then create a function that takes a socket as argument and returns a 'chat message' Event.
-```
-connectionToSockEvent = socket => frp.socket.on(socket, 'chat message')
+<div id="container">
+    <div id="slider">
+        <div id="slide-1"></div>
+        <div id="slide-2"></div>
+        <div id="slide-3"></div>
+        <div id="slide-4"></div>    
+    </div>
+</div>
 ```
 
-Now we bind the 'connection' Event to the 'chat message' Event.
-```
-msgEvent              = frp.bind(connectionEvent, connectionToSockEvent)
-```
-
-msgEvent is the new Event created by binding the above two Events. It is important to note here that none of the Events are activated yet. The Events get activated when msgEvent is called with the callback.
+Require the `swipeview` module and call it with the container element.
 
 ```
-msgEvent(msg => frp.io.emit('chat message', msg))
+import swipeview from "swipeview"
+
+const container = document.getElementById("container")
+swipeview(container)
 ```
 
-##### The client side code
+**How it works**
+
+Swipeview composes touch events on the container element using various core frp primitives and activates the composed event stream through an activation function.
+
+The core logic is placed inside a single `compose` function:
 
 ```
-<!doctype html>
-<html>
-  <head>
-    <title>Socket.IO chat</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
-  </head>
-  <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+let stream$ = frp.compose(
+    dom.touchStart(container),
+    frp.merge(dom.touchMove(container)),
+    frp.merge(dom.touchEnd(container)),
 
-<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    frp.map(event => ({
+        type: event.type,
+        pageX: getPageX(event),
+        time: event.timeStamp
+    })),
 
-<!-- $ browserify -r frpjs -i socket.io -i https -i fs -o frpjs-bundle.js -->
-<script src="js/frpjs-bundle.js"></script>
+    frp.fold((prev, curr) => {
+        curr.startX = (curr.type == "touchstart") ? curr.pageX : prev.startX
+        curr.startTime = (curr.type == "touchstart") ? curr.time : prev.startTime
+        curr.displacement = curr.pageX - curr.startX
+        curr.slideIndex = prev.slideIndex
 
-<script>
-
-var socket         = io(),
-    frp            = require('frpjs'),
-    input          = frp.dom.select('input'),
-    submitEvents   = frp.dom.onSubmit(frp.dom.select('form')),
-    filteredEvents = frp.filter(submitEvents, () => !!input.value.length)
-
-filteredEvents(e => {
-    socket.emit('chat message', input.value)
-    input.value = ''
-    e.preventDefault()
-})
-
-socket.on('chat message', msg =>
-    frp.dom.select('ul').appendChild(frp.dom.create('li', msg))
+        return curr
+    }, { slideIndex: 0 })
 )
-
-</script>
-
-  </body>
-</html>
 ```
 
-We create a submit Event first
+First, we create touchstart, touchmove and touchend event streams on the container element and combine them into a single stream using merge.
+
 ```
-submitEvents   = frp.dom.onSubmit(frp.dom.select('form'))
+    dom.touchStart(container),
+    frp.merge(dom.touchMove(container)),
+    frp.merge(dom.touchEnd(container)),
 ```
 
-Next we apply a filter on the `submit` events, so that only valid submissions (input field is not empty) are allowed. The filter returns a new filtered Event.
+Then, map over the event stream and pick out the event type, x position and timestamp from each event.
+
 ```
-filteredEvents = frp.filter(submitEvents, () => !!input.value.length)
+    frp.map(event => ({
+        type: event.type,
+        pageX: getPageX(event),
+        time: event.timeStamp
+    })),
 ```
 
-Then we insert every chat message into the DOM.
+Finally, using fold, copy the start x position and start time from each touchstart to their corresponding touchmove and touchend events. Calculate the current displacement and add a slideIndex to hold the index of the current slide.
+
 ```
-socket.on('chat message', msg =>
-    frp.dom.select('ul').appendChild(frp.dom.create('li', msg))
-)
+    frp.fold((prev, curr) => {
+        curr.startX = (curr.type == "touchstart") ? curr.pageX : prev.startX
+        curr.startTime = (curr.type == "touchstart") ? curr.time : prev.startTime
+        curr.displacement = curr.pageX - curr.startX
+        curr.slideIndex = prev.slideIndex
+
+        return curr
+    }, { slideIndex: 0 })
+```
+
+The composed event stream is then activated using an activation function. The activation function handles DOM updates and takes a view object that holds references to the container, slider and individual slides.
+
+```
+const view = new SwipeView(container, slideWidth, slideHeight)
+stream$(event => activateEventStream(event, view))
+```
+
+Inside the activation function, based on the event type, different scenarios -- such as swiping, flicking, pulling on slider edges -- are handled and corresponding changes are made to the slider element.
+
+```
+function activateEventStream(event, view) {
+    if (event.type == "touchmove")
+        handleTouchMove(event, view)
+    else if (event.type == "touchend")
+        handleTouchEnd(event, view)
+}
 ```
 
 ### frpjs docs - Available functions
@@ -150,104 +124,74 @@ socket.on('chat message', msg =>
 #### Core frpjs functions
 
 ```
-FRP.map(eventStream, valueTransform)
+import FRP from "frpjs"
+
+FRP.map(valueTransform)(eventStream)
 // Takes an eventStream and a function that transforms the value of the Event.
 // Returns a new Event that emits the transformed Value
 
-FRP.bind(eventStream, valueToEvent)
+FRP.bind(valueToEvent)(eventStream)
 // Binds an eventStream to a new EventStream. Function valueToEvent is called
 // with the event value. Returns a new Event Stream.
 
-FRP.filter(eventStream, predicate)
+FRP.filter(predicate)(eventStream)
 // Filters an Event Stream. Predicate is called with every value.
 
 FRP.reject(eventStream, predicate)
 // Opposite of filter
 
-FRP.foldp(eventStream, step, initial)
-// Is the 'reduce' function for every event in the stream. step function
-// is called accumulator and the current value.
+FRP.fold(step, initial)(eventStream)
+// Is the 'reduce' function for every event in the stream. The step function
+// is called with the accumulator and the current value. The parameter initial
+// is the initial value of the accumulator
 
-FRP.hub(eventStream)
-// Returns a new Event hub. Every time you call the hub with a listener, 
-// the listener is added to the hub and called with the event value
+FRP.merge(eventStreamA)(eventStreamB)
+// Takes two eventStreams, combines them and returns a new eventStream
 
-FRP.stepper(eventStream, initial) 
+FRP.compose(eventStream, ...operations)
+// Takes an eventStream, performs a series of operations on it and returns
+// a modified stream. All FRP operations are curried by default.
+
+FRP.stepper(initial)(eventStream)
 // Returns a behaviour. Call the behaviour for the last value of the event.
 
-FRP.throttle = function(eventStream, ms)
+FRP.throttle(ms)(eventStream)
 // Throttle an EventStream to every ms milliseconds
 ```
 
 #### DOM functions
 
 ```
-FRP.dom.select(selector)
+import DOM from "frpjs/dom"
+
+DOM.select(selector)
 // Same as document.querySelector
 
-FRP.dom.selectAll(selector)
+DOM.selectAll(selector)
 // Same as document.querySelectorAll
 
-FRP.dom.create(tagname[, text])
+DOM.create(tagname[, text])
 // Creates an element with the given tagname. Optional text will be added
 // to the textContent of created element
 
-FRP.dom.on(element, name, useCapture)
+DOM.on(element, name, useCapture)
 // Return a new DOM Event Stream on the given element
 
-FRP.dom.onClick(element, useCapture)
+DOM.onClick(element, useCapture)
 // Returns a new 'click' Event Stream on the given element
 
-FRP.dom.onChange(element, useCapture)
+DOM.onChange(element, useCapture)
 // Returns a new 'change' Event Stream on the given element
 
-FRP.dom.onSubmit(element, useCapture)
+DOM.onSubmit(element, useCapture)
 // Returns a new 'submit' Event Stream on the given element
 
-FRP.dom.onResizeWindow = function([throttle])
-// Returns a window resize event Stream. Optional throttle will throttle the 
-// eventStream to every 'throttle' milliseconds.
+DOM.touchStart(element, useCapture)
+// Returns a new 'touchstart' Event Stream on the given element
+
+DOM.touchMove(element, useCapture)
+// Returns a new 'touchmove' Event Stream on the given element
+
+DOM.touchEnd(element, useCapture)
+// Returns a new 'touchend' Event Stream on the given element
 ```
-
-#### XHR functions
-
-```
-FRP.xhr.get(url)
-// Gets the url. Call the returned event with a callback
-// Callback is called with value. Value can be on of following
-// 1. responseText, 2. JSON Object if content type is application/json
-// 3. Error Object (check instanceof Error)
-
-FRP.xhr.post(url, body)
-// if body is a JSON object type application/json is posted.
-// response works like get above
-```
-
-#### Nodejs functions
-
-```
-FRP.https.get(url)
-// Will return an 'end' event. Callback is called with data
-
-FRP.fs.readFile(filename)
-// Will return a an EventStream. Callback is called with data
-```
-
-#### Socket.io functions for Node
-
-```
-FRP.io.connectToServer(http)
-// connect socket io to the http server. Returns 'io'
-
-FRP.io.on = function(name)
-// wrapper for io.on
-
-FRP.io.emit(name, msg)
-// wrapper for io.emit
-
-FRP.socket.on(socket, name)
-// wrapper for socket.on
-```
-
-
-
