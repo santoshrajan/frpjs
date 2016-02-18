@@ -81,6 +81,20 @@ FRP.stepper = function (eventStream, initial) {
     })
 }
 
+
+FRP.snapshot = function(behavior) {
+    if (typeof behavior == "function")
+        return behavior()
+    return behavior
+}
+
+FRP.liftN = function(combine, ...behaviors) {
+    return function() {
+        const values = behaviors.map(FRP.snapshot)
+        return combine(...values)
+    }
+}
+
 FRP.throttle = function(eventStream, ms) {
     return (function(next) {
         let last = 0
