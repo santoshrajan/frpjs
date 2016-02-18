@@ -10,40 +10,41 @@ DOM.selectAll = function(selector) {
     return document.querySelectorAll(selector)
 }
 
-DOM.create = function(tagname, text) {
+DOM.createElement = function(tagname, text) {
     let elem = document.createElement(tagname)
     if (text) elem.textContent = text
     return elem
 }
 
-DOM.on = function(element, name, useCapture) {
+DOM.createEventStream = function(selector, name, useCapture) {
     return function(next) {
+        let element = DOM.select(selector)
         element.addEventListener(name, next, !!useCapture)
     }
 }
 
-DOM.onClick = function(element, useCapture) {
-    return DOM.on(element, 'click', !!useCapture)
+DOM.onClick = function(selector, useCapture) {
+    return DOM.createEventStream(selector, 'click', !!useCapture)
 }
 
-DOM.onChange = function(element, useCapture) {
-    return DOM.on(element, 'change', !!useCapture)
+DOM.onChange = function(selector, useCapture) {
+    return DOM.createEventStream(selector, 'change', !!useCapture)
 }
 
-DOM.onSubmit = function(element, useCapture) {
-    return DOM.on(element, 'submit', !!useCapture)
+DOM.onSubmit = function(selector, useCapture) {
+    return DOM.createEventStream(selector, 'submit', !!useCapture)
 }
 
-DOM.touchStart = function(element, useCapture) {
-    return DOM.on(element, 'touchstart', !!useCapture)
+DOM.onTouchStart = function(selector, useCapture) {
+    return DOM.createEventStream(selector, 'touchstart', !!useCapture)
 }
 
-DOM.touchMove = function(element, useCapture) {
-    return DOM.on(element, 'touchmove', !!useCapture)
+DOM.onTouchMove = function(selector, useCapture) {
+    return DOM.createEventStream(selector, 'touchmove', !!useCapture)
 }
 
-DOM.touchEnd = function(element, useCapture) {
-    return DOM.on(element, 'touchend', !!useCapture)
+DOM.onTouchEnd = function(selector, useCapture) {
+    return DOM.createEventStream(selector, 'touchend', !!useCapture)
 }
 
 export default DOM
