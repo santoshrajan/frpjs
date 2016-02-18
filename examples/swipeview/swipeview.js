@@ -3,11 +3,11 @@
 import frp from "frpjs"
 import dom from "frpjs/dom"
 
-export default function(container, slideWidth, slideHeight) {
+export default function(selector, slideWidth, slideHeight) {
     let stream$ = frp.compose(
-        dom.touchStart(container),
-        frp.merge(dom.touchMove(container)),
-        frp.merge(dom.touchEnd(container)),
+        dom.onTouchStart(selector),
+        frp.merge(dom.onTouchMove(selector)),
+        frp.merge(dom.onTouchEnd(selector)),
 
         frp.map(event => ({
             type: event.type,
@@ -25,7 +25,7 @@ export default function(container, slideWidth, slideHeight) {
         }, { slideIndex: 0 })
     )
 
-    const view = new SwipeView(container, slideWidth, slideHeight)
+    const view = new SwipeView(selector, slideWidth, slideHeight)
     stream$(event => activateEventStream(event, view))
 }
 
@@ -59,11 +59,11 @@ function handleTouchEnd(event, view) {
     view.animate(distance, time)
 }
 
-function SwipeView(container, slideWidth, slideHeight) {
+function SwipeView(selector, slideWidth, slideHeight) {
     this.slideWidth  = slideWidth  || window.innerWidth
     this.slideHeight = slideHeight || window.innerHeight
 
-    this.container = container
+    this.container = dom.select(selector)
     this.slider    = this.container.firstElementChild
     this.slides    = this.slider.children
 

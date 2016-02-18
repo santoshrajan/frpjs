@@ -4,6 +4,9 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 // Core FRP functions
 
 var FRP = {};
@@ -95,6 +98,22 @@ FRP.stepper = function (eventStream, initial) {
     };
 };
 
+FRP.snapshot = function (behavior) {
+    if (typeof behavior == "function") return behavior();
+    return behavior;
+};
+
+FRP.liftN = function (combine) {
+    for (var _len2 = arguments.length, behaviors = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        behaviors[_key2 - 1] = arguments[_key2];
+    }
+
+    return function () {
+        var values = behaviors.map(FRP.snapshot);
+        return combine.apply(undefined, _toConsumableArray(values));
+    };
+};
+
 FRP.throttle = function (eventStream, ms) {
     return function (next) {
         var last = 0;
@@ -128,40 +147,41 @@ DOM.selectAll = function (selector) {
     return document.querySelectorAll(selector);
 };
 
-DOM.create = function (tagname, text) {
+DOM.createElement = function (tagname, text) {
     var elem = document.createElement(tagname);
     if (text) elem.textContent = text;
     return elem;
 };
 
-DOM.on = function (element, name, useCapture) {
+DOM.createEventStream = function (selector, name, useCapture) {
     return function (next) {
+        var element = DOM.select(selector);
         element.addEventListener(name, next, !!useCapture);
     };
 };
 
-DOM.onClick = function (element, useCapture) {
-    return DOM.on(element, 'click', !!useCapture);
+DOM.onClick = function (selector, useCapture) {
+    return DOM.createEventStream(selector, 'click', !!useCapture);
 };
 
-DOM.onChange = function (element, useCapture) {
-    return DOM.on(element, 'change', !!useCapture);
+DOM.onChange = function (selector, useCapture) {
+    return DOM.createEventStream(selector, 'change', !!useCapture);
 };
 
-DOM.onSubmit = function (element, useCapture) {
-    return DOM.on(element, 'submit', !!useCapture);
+DOM.onSubmit = function (selector, useCapture) {
+    return DOM.createEventStream(selector, 'submit', !!useCapture);
 };
 
-DOM.touchStart = function (element, useCapture) {
-    return DOM.on(element, 'touchstart', !!useCapture);
+DOM.onTouchStart = function (selector, useCapture) {
+    return DOM.createEventStream(selector, 'touchstart', !!useCapture);
 };
 
-DOM.touchMove = function (element, useCapture) {
-    return DOM.on(element, 'touchmove', !!useCapture);
+DOM.onTouchMove = function (selector, useCapture) {
+    return DOM.createEventStream(selector, 'touchmove', !!useCapture);
 };
 
-DOM.touchEnd = function (element, useCapture) {
-    return DOM.on(element, 'touchend', !!useCapture);
+DOM.onTouchEnd = function (selector, useCapture) {
+    return DOM.createEventStream(selector, 'touchend', !!useCapture);
 };
 
 exports.default = DOM;
@@ -175,8 +195,7 @@ var _swipeview2 = _interopRequireDefault(_swipeview);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var container = document.getElementById("container");
-(0, _swipeview2.default)(container);
+(0, _swipeview2.default)("#container");
 
 },{"./swipeview":4}],4:[function(require,module,exports){
 "use strict";
@@ -185,8 +204,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-exports.default = function (container, slideWidth, slideHeight) {
-    var stream$ = _frpjs2.default.compose(_dom2.default.touchStart(container), _frpjs2.default.merge(_dom2.default.touchMove(container)), _frpjs2.default.merge(_dom2.default.touchEnd(container)), _frpjs2.default.map(function (event) {
+exports.default = function (selector, slideWidth, slideHeight) {
+    var stream$ = _frpjs2.default.compose(_dom2.default.onTouchStart(selector), _frpjs2.default.merge(_dom2.default.onTouchMove(selector)), _frpjs2.default.merge(_dom2.default.onTouchEnd(selector)), _frpjs2.default.map(function (event) {
         return {
             type: event.type,
             pageX: getPageX(event),
@@ -201,7 +220,7 @@ exports.default = function (container, slideWidth, slideHeight) {
         return curr;
     }, { slideIndex: 0 }));
 
-    var view = new SwipeView(container, slideWidth, slideHeight);
+    var view = new SwipeView(selector, slideWidth, slideHeight);
     stream$(function (event) {
         return activateEventStream(event, view);
     });
@@ -241,11 +260,11 @@ function handleTouchEnd(event, view) {
     view.animate(distance, time);
 }
 
-function SwipeView(container, slideWidth, slideHeight) {
+function SwipeView(selector, slideWidth, slideHeight) {
     this.slideWidth = slideWidth || window.innerWidth;
     this.slideHeight = slideHeight || window.innerHeight;
 
-    this.container = container;
+    this.container = _dom2.default.select(selector);
     this.slider = this.container.firstElementChild;
     this.slides = this.slider.children;
 
