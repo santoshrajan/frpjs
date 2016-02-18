@@ -32,13 +32,12 @@ Create a div structure as shown below. The `container` div is the visual contain
 </div>
 ```
 
-Require the `swipeview` module and call it with the container element.
+Require the `swipeview` module and call it with a selector to the container element.
 
 ```
 import swipeview from "swipeview"
 
-const container = document.getElementById("container")
-swipeview(container)
+swipeview("#container")
 ```
 
 **How it works**
