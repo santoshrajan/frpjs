@@ -175,28 +175,28 @@ DOM.select(selector)
 DOM.selectAll(selector)
 // Same as document.querySelectorAll
 
-DOM.create(tagname[, text])
+DOM.createElement(tagname[, text])
 // Creates an element with the given tagname. Optional text will be added
 // to the textContent of created element
 
-DOM.on(element, name, useCapture)
-// Return a new DOM Event Stream on the given element
+DOM.createEventStream(selector, name, useCapture)
+// Return a new DOM Event Stream on the element matching the given selector
 
-DOM.onClick(element, useCapture)
-// Returns a new 'click' Event Stream on the given element
+DOM.onClick(selector, useCapture)
+// Returns a new 'click' Event Stream on the element matching the given selector
 
-DOM.onChange(element, useCapture)
-// Returns a new 'change' Event Stream on the given element
+DOM.onChange(selector, useCapture)
+// Returns a new 'change' Event Stream on the element matching the given selector
 
-DOM.onSubmit(element, useCapture)
-// Returns a new 'submit' Event Stream on the given element
+DOM.onSubmit(selector, useCapture)
+// Returns a new 'submit' Event Stream on the element matching the given selector
 
-DOM.touchStart(element, useCapture)
-// Returns a new 'touchstart' Event Stream on the given element
+DOM.onTouchStart(selector, useCapture)
+// Returns a new 'touchstart' Event Stream on the element matching the given selector
 
-DOM.touchMove(element, useCapture)
-// Returns a new 'touchmove' Event Stream on the given element
+DOM.onTouchMove(selector, useCapture)
+// Returns a new 'touchmove' Event Stream on the element matching the given selector
 
-DOM.touchEnd(element, useCapture)
-// Returns a new 'touchend' Event Stream on the given element
+DOM.onTouchEnd(selector, useCapture)
+// Returns a new 'touchend' Event Stream on the element matching the given selector
 ```
