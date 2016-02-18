@@ -13,7 +13,11 @@ Install using npm
 $ npm install frpjs --save
 ```
 
-#### Example: swipeview
+#### Examples
+
+[See this](http://moonbug.in/frpjs-examples/) for a set of examples introducing each primitive.
+
+##### Swipeview
 
 Swipeview.js is a library that uses frpjs for building smooth touch-based content sliders for mobile devices. See the [source code here](examples/swipeview/swipeview.js) or [try it out on a mobile browser](http://santoshrajan.com/frpjs/swipeview/).
 
@@ -48,9 +52,9 @@ The core logic is placed inside a single `compose`:
 
 ```
 let stream$ = frp.compose(
-    dom.touchStart(container),
-    frp.merge(dom.touchMove(container)),
-    frp.merge(dom.touchEnd(container)),
+    dom.onTouchStart(selector),
+    frp.merge(dom.onTouchMove(selector)),
+    frp.merge(dom.onTouchEnd(selector)),
 
     frp.map(event => ({
         type: event.type,
@@ -73,9 +77,9 @@ First, create touchstart, touchmove and touchend event streams on the container 
 
 ```
 ...
-    dom.touchStart(container),
-    frp.merge(dom.touchMove(container)),
-    frp.merge(dom.touchEnd(container)),
+    dom.onTouchStart(selector),
+    frp.merge(dom.onTouchMove(selector)),
+    frp.merge(dom.onTouchEnd(selector)),
 ...
 ```
 
@@ -109,7 +113,7 @@ Finally, using fold, copy the start x position and start time from each touchsta
 The composed event stream is then activated using an activation function. The activation function takes in a view object and handles the DOM updates. The view object holds references to the container, slider and individual slide elements.
 
 ```
-const view = new SwipeView(container, slideWidth, slideHeight)
+const view = new SwipeView(selector, slideWidth, slideHeight)
 stream$(event => activateEventStream(event, view))
 ```
 
