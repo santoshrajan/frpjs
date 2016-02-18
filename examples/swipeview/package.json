@@ -11,7 +11,7 @@
     "url": "https://github.com/geekskool/swipeviewjs.git"
   },
   "dependencies": {
-    "frpjs": "^0.1.0"
+    "frpjs": "^0.2.0"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
