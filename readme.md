@@ -15,11 +15,11 @@ $ npm install frpjs --save
 
 #### Examples
 
-[See this](http://moonbug.in/frpjs-examples/) for a set of examples introducing each primitive.
+[Follow this link](http://moonbug.in/frpjs-examples/) for a set of examples introducing each primitive. For a more elaborate app, see the description of swipeview below.
 
 ##### Swipeview
 
-Swipeview.js is a library that uses frpjs for building smooth touch-based content sliders for mobile devices. See the [source code here](examples/swipeview/swipeview.js) or [try it out on a mobile browser](http://santoshrajan.com/frpjs/swipeview/).
+Swipeview.js is a library that uses frpjs for building smooth touch-based content sliders. See the [source code here](examples/swipeview/swipeview.js) or [try it out on a mobile browser](http://santoshrajan.com/frpjs/swipeview/).
 
 **Usage**
 
