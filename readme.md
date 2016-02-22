@@ -25,7 +25,7 @@ Swipeview.js is a library that uses frpjs for building smooth touch-based conten
 
 Create a div structure as shown below. The `container` div is the visual container, `slider` holdes the individual `slides` and moves underneath the container.
 
-```
+```html
 <div id="container">
     <div id="slider">
         <div id="slide-1"></div>
@@ -38,7 +38,7 @@ Create a div structure as shown below. The `container` div is the visual contain
 
 Require the `swipeview` module and call it with a selector to the container element.
 
-```
+```js
 import swipeview from "swipeview"
 
 swipeview("#container")
@@ -50,7 +50,7 @@ Swipeview composes touch events on the container element using various core frp 
 
 The core logic is placed inside a single `compose`:
 
-```
+```js
 let stream$ = frp.compose(
     dom.onTouchStart(selector),
     frp.merge(dom.onTouchMove(selector)),
@@ -75,7 +75,7 @@ let stream$ = frp.compose(
 
 First, create touchstart, touchmove and touchend event streams on the container element and combine them into a single stream using merge.
 
-```
+```js
 ...
     dom.onTouchStart(selector),
     frp.merge(dom.onTouchMove(selector)),
@@ -85,7 +85,7 @@ First, create touchstart, touchmove and touchend event streams on the container 
 
 Then, map over the combined event stream and pick out the event type, x position and timestamp from each event.
 
-```
+```js
 ...
     frp.map(event => ({
         type: event.type,
@@ -97,7 +97,7 @@ Then, map over the combined event stream and pick out the event type, x position
 
 Finally, using fold, copy the start x position and start time from each touchstart to their corresponding touchmove and touchend events. Calculate the current displacement and add a `slideIndex` to hold the index of the current slide.
 
-```
+```js
 ...
     frp.fold((prev, curr) => {
         curr.startX = (curr.type == "touchstart") ? curr.pageX : prev.startX
@@ -112,14 +112,14 @@ Finally, using fold, copy the start x position and start time from each touchsta
 
 The composed event stream is then activated using an activation function. The activation function takes in a view object and handles the DOM updates. The view object holds references to the container, slider and individual slide elements.
 
-```
+```js
 const view = new SwipeView(selector, slideWidth, slideHeight)
 stream$(event => activateEventStream(event, view))
 ```
 
 Inside the activation function, based on the event type, different scenarios -- such as swiping, flicking, pulling the slider edge -- are handled and appropriate changes are made to the DOM.
 
-```
+```js
 function activateEventStream(event, view) {
     if (event.type == "touchmove")
         handleTouchMove(event, view)
@@ -132,7 +132,7 @@ function activateEventStream(event, view) {
 
 #### Core frpjs functions
 
-```
+```js
 import FRP from "frpjs"
 
 FRP.map(valueTransform)(eventStream)
@@ -170,7 +170,7 @@ FRP.throttle(ms)(eventStream)
 
 #### DOM functions
 
-```
+```js
 import DOM from "frpjs/dom"
 
 DOM.select(selector)
