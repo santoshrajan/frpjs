@@ -15,8 +15,8 @@ $ npm install frpjs --save
 
 ### Examples
 
-- [Basic Examples](examples/basic-examples/readme.md)
-- [Swipeview](examples/swipeview/readme.md)
+- [Basic Examples](examples/basic-examples/)
+- [Swipeview](examples/swipeview/)
 
 ### Documentation
 
