@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Basic Examples</title>
+
+  <link rel="stylesheet" href="./styles/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Example 1 -->
+  <div class="row">
+    <h3 class="col-md-12">Clear</h3>
+    <div class="col-md-7">
+
+<pre>const clear$ = frp.compose(
+    dom.createEventStream('#ex1-button', 'click'),
+    frp.map(event => '')
+)
+
+clear$(text => dom.select('#ex1-input').value = text)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-inline">
+          <input type="text" class="form-control" id="ex1-input" value="Hello"></input>
+          <button type="button" class="btn btn-primary" id="ex1-button">Clear</button>
+        </div>
+      </form>
+    </div>
+  </div>         
+
+  <!-- Example 2 -->
+  <div class="row">
+    <h3 class="col-md-12">Copy</h3>
+    <div class="col-md-7">
+
+<pre>const copy$ = frp.compose(
+    dom.createEventStream('#ex2-input', 'input'),
+    frp.map(event => event.target.value)
+)
+
+copy$(text => dom.select('#ex2-label').textContent = text)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-group">
+          <input type="text" class="form-control" id="ex2-input" value="Hello"></input>
+          <label id="ex2-label" style="padding-left: 10px; padding-top: 10px">Hello</label>
+        </div>
+      </form>
+    </div>
+  </div>   
+
+  <!-- Example 3 -->
+  <div class="row">
+    <h3 class="col-md-12">Reverse</h3>
+    <div class="col-md-7">
+
+<pre>const copy$ = frp.compose(
+    dom.createEventStream('#ex3-input', 'input'),
+    frp.map(event => event.target.value),
+    frp.map(text => text.split('').reverse().join(''))
+)
+
+copy$(text => dom.select('#ex3-label').textContent = text)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-group">
+         <input type="text" class="form-control" id="ex3-input" value="Hello"></input>
+          <label id="ex3-label" style="padding-left: 10px; padding-top: 10px">olleH</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Example 4 -->
+  <div class="row">
+    <h3 class="col-md-12">Count</h3>
+    <div class="col-md-7">
+
+<pre>const count$ = frp.compose(
+    dom.createEventStream('#ex4-button', 'click'),
+    frp.map(event => 1),
+    frp.fold((accum, curr) => accum + curr, 0)
+)
+
+count$(count => dom.select('#ex4-label').textContent = count)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-inline">
+          <button type="button" class="btn btn-primary" id="ex4-button">Count</button>
+          <label id="ex4-label" style="padding-left: 10px">0</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Example 5 -->
+  <div class="row">
+    <h3 class="col-md-12">Step</h3>
+    <div class="col-md-7">
+
+<pre>const add$ = frp.compose(
+    dom.createEventStream('#ex5-addBtn', 'click'),
+    frp.map(event => +1)
+)
+const sub$ = frp.compose(
+    dom.createEventStream('#ex5-subBtn', 'click'),
+    frp.map(event => -1)
+)
+const count$ = frp.compose(
+    add$,
+    frp.merge(sub$),
+    frp.fold((accum, curr) => accum + curr, 0)
+)
+
+count$(count => dom.select('#ex5-label').textContent = count)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-inline">
+          <button type="button" class="btn btn-primary" id="ex5-subBtn">-1</button>
+          <button type="button" class="btn btn-primary" id="ex5-addBtn">+1</button>
+          <label id="ex5-label" style="padding-left: 10px">0</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Example 6 -->
+  <div class="row">
+    <h3 class="col-md-12">Hold</h3>
+    <div class="col-md-7">
+
+<pre>const red$ = frp.compose(
+    dom.createEventStream('#ex6-redBtn', 'click'),
+    frp.map(event => 'red')
+)
+const green$ = frp.compose(
+    dom.createEventStream('#ex6-greenBtn', 'click'),
+    frp.map(event => 'green')
+)
+const color$ = frp.compose(
+    red$,
+    frp.merge(green$)
+)
+
+const colorValue = frp.stepper(color$, null)
+color$(color => 
+  dom.select('#ex6-label').textContent = frp.snapshot(colorValue)
+)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-inline">
+          <button type="button" class="btn btn-primary" id="ex6-redBtn">red</button>
+          <button type="button" class="btn btn-primary" id="ex6-greenBtn">green</button>
+          <label id="ex6-label" style="padding-left: 10px">red</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Example 7 -->
+  <div class="row">
+    <h3 class="col-md-12">Encrypt</h3>
+    <div class="col-md-7">
+
+<pre>const input$ = frp.compose(
+    dom.createEventStream('#ex7-input', 'input'),
+    frp.map(event => event.target.value)
+)
+const inputValue = frp.stepper(input$, 'Hello')
+const click$ = dom.createEventStream('#ex7-button', 'click')
+
+click$(click => 
+  dom.select('#ex7-label').textContent = rot13(frp.snapshot(inputValue))
+)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-inline">
+          <input type="text" class="form-control" id="ex7-input" value="Hello" style="max-width: 70%">
+          </input>
+          <button type="button" class="btn btn-primary" id="ex7-button">Encrypt</button>
+        </div>
+        <label id="ex7-label" style="padding-left: 10px; padding-top: 10px"></label>
+      </form>
+    </div>
+  </div>
+
+  <!-- Example 8 -->
+  <div class="row">
+    <h3 class="col-md-12">Add</h3>
+    <div class="col-md-7">
+
+<pre>const input1$ = frp.compose(
+    dom.createEventStream('#ex8-input1', 'input'),
+    frp.map(event => event.target.value),
+    frp.map(value => parseInt(value))
+)
+const input2$ = frp.compose(
+    dom.createEventStream('#ex8-input2', 'input'),
+    frp.map(event => event.target.value),
+    frp.map(value => parseInt(value))
+)
+const inputs$ = frp.compose(
+    input1$,
+    frp.merge(input2$)
+)
+const totalValue = frp.liftN(
+    (a, b) => a + b, 
+    frp.stepper(input1$, 5), 
+    frp.stepper(input2$, 10)
+)
+
+inputs$(input => 
+  dom.select('#ex8-label').textContent = frp.snapshot(totalValue)
+)</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+        <div class="form-inline">
+          <input type="text" class="form-control" id="ex8-input1" value="5" style="max-width: 30%">
+          <input type="text" class="form-control" id="ex8-input2" value="10" style="max-width: 30%">
+          <label id="ex8-label" style="padding-left: 10px">15</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script src="build/app.js"></script>
+</body>
+</html>

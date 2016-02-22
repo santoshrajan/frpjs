@@ -1,0 +1,1 @@
+JavaScript port of examples from the book [Functional Reactive Programming](https://www.manning.com/books/functional-reactive-programming) by Stephen Blackheath and Anthony Jones.
