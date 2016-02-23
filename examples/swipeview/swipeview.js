@@ -4,6 +4,8 @@ import frp from "frpjs"
 import dom from "frpjs/dom"
 
 export default function(selector, slideWidth, slideHeight) {
+    const view = new SwipeView(selector, slideWidth, slideHeight)
+
     let stream$ = frp.compose(
         dom.onTouchStart(selector),
         frp.merge(dom.onTouchMove(selector)),
@@ -22,41 +24,29 @@ export default function(selector, slideWidth, slideHeight) {
             curr.slideIndex = prev.slideIndex
 
             return curr
-        }, { slideIndex: 0 })
+        }, { slideIndex: 0 }),
+
+        frp.map(event => {
+            if (event.type == "touchmove")
+                event.move = view.handleTouchMove(event)
+            if (event.type == "touchend")
+                event.move = view.handleTouchEnd(event)
+
+            return event
+        })
     )
 
-    const view = new SwipeView(selector, slideWidth, slideHeight)
     stream$(event => activateEventStream(event, view))
 }
 
 function activateEventStream(event, view) {
-    if (event.type == "touchmove")
-        handleTouchMove(event, view)
-    else if (event.type == "touchend")
-        handleTouchEnd(event, view)
-}
-
-function handleTouchMove(event, view) {
-    if (view.canSlideLeft(event) || view.canSlideRight(event)) {
-        let distance = -(event.slideIndex * view.slideWidth) + event.displacement
-        view.move(distance)
-    } else if (view.isPullingEdge(event)) {
-        let distance = -(event.slideIndex * view.slideWidth) + (view.edgePadding / view.slideWidth) * event.displacement
-        view.move(distance)
+    if (event.move) {
+        let { type, distance, time } = event.move
+        if (type == "move")
+            view.move(distance)
+        if (type == "animate")
+            view.animate(distance, time)
     }
-}
-
-function handleTouchEnd(event, view) {
-    if (view.hasCrossedMidPoint(event) || view.isFlicked(event)) {
-        if (view.canSlideRight(event))
-            event.slideIndex++
-        else if (view.canSlideLeft(event))
-            event.slideIndex--
-    }
-
-    let distance = -(event.slideIndex * view.slideWidth)
-    let time     = view.isFlicked(event) ? 150 : 300
-    view.animate(distance, time)
 }
 
 function SwipeView(selector, slideWidth, slideHeight) {
@@ -112,6 +102,29 @@ SwipeView.prototype.hasCrossedMidPoint = function(event) {
 
 SwipeView.prototype.isFlicked = function(event) {
     return getSpeed(event) > 1
+}
+
+SwipeView.prototype.handleTouchMove = function(event) {
+    if (this.canSlideLeft(event) || this.canSlideRight(event)) {
+        let distance = -(event.slideIndex * this.slideWidth) + event.displacement
+        return { type: "move", distance: distance }
+    } else if (this.isPullingEdge(event)) {
+        let distance = -(event.slideIndex * this.slideWidth) + (this.edgePadding / this.slideWidth) * event.displacement
+        return { type: "move", distance: distance }
+    }
+}
+
+SwipeView.prototype.handleTouchEnd = function(event) {
+    if (this.hasCrossedMidPoint(event) || this.isFlicked(event)) {
+        if (this.canSlideRight(event))
+            event.slideIndex++
+        else if (this.canSlideLeft(event))
+            event.slideIndex--
+    }
+
+    let distance = -(event.slideIndex * this.slideWidth)
+    let time     = this.isFlicked(event) ? 150 : 300
+    return { type: "animate", distance: distance, time: time }
 }
 
 SwipeView.prototype.animate = function(translateX, ms) {

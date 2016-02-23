@@ -1,6 +1,17 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
+var _swipeview = require("./swipeview");
+
+var _swipeview2 = _interopRequireDefault(_swipeview);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(0, _swipeview2.default)("#container");
+
+},{"./swipeview":4}],2:[function(require,module,exports){
+"use strict";
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -129,7 +140,7 @@ FRP.throttle = function (eventStream, ms) {
 
 exports.default = FRP;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -186,18 +197,7 @@ DOM.onTouchEnd = function (selector, useCapture) {
 
 exports.default = DOM;
 
-},{}],3:[function(require,module,exports){
-"use strict";
-
-var _swipeview = require("./swipeview");
-
-var _swipeview2 = _interopRequireDefault(_swipeview);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-(0, _swipeview2.default)("#container");
-
-},{"./swipeview":4}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -205,6 +205,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (selector, slideWidth, slideHeight) {
+    var view = new SwipeView(selector, slideWidth, slideHeight);
+
     var stream$ = _frpjs2.default.compose(_dom2.default.onTouchStart(selector), _frpjs2.default.merge(_dom2.default.onTouchMove(selector)), _frpjs2.default.merge(_dom2.default.onTouchEnd(selector)), _frpjs2.default.map(function (event) {
         return {
             type: event.type,
@@ -218,9 +220,13 @@ exports.default = function (selector, slideWidth, slideHeight) {
         curr.slideIndex = prev.slideIndex;
 
         return curr;
-    }, { slideIndex: 0 }));
+    }, { slideIndex: 0 }), _frpjs2.default.map(function (event) {
+        if (event.type == "touchmove") event.move = view.handleTouchMove(event);
+        if (event.type == "touchend") event.move = view.handleTouchEnd(event);
 
-    var view = new SwipeView(selector, slideWidth, slideHeight);
+        return event;
+    }));
+
     stream$(function (event) {
         return activateEventStream(event, view);
     });
@@ -237,27 +243,15 @@ var _dom2 = _interopRequireDefault(_dom);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function activateEventStream(event, view) {
-    if (event.type == "touchmove") handleTouchMove(event, view);else if (event.type == "touchend") handleTouchEnd(event, view);
-}
+    if (event.move) {
+        var _event$move = event.move;
+        var type = _event$move.type;
+        var distance = _event$move.distance;
+        var time = _event$move.time;
 
-function handleTouchMove(event, view) {
-    if (view.canSlideLeft(event) || view.canSlideRight(event)) {
-        var distance = -(event.slideIndex * view.slideWidth) + event.displacement;
-        view.move(distance);
-    } else if (view.isPullingEdge(event)) {
-        var distance = -(event.slideIndex * view.slideWidth) + view.edgePadding / view.slideWidth * event.displacement;
-        view.move(distance);
+        if (type == "move") view.move(distance);
+        if (type == "animate") view.animate(distance, time);
     }
-}
-
-function handleTouchEnd(event, view) {
-    if (view.hasCrossedMidPoint(event) || view.isFlicked(event)) {
-        if (view.canSlideRight(event)) event.slideIndex++;else if (view.canSlideLeft(event)) event.slideIndex--;
-    }
-
-    var distance = -(event.slideIndex * view.slideWidth);
-    var time = view.isFlicked(event) ? 150 : 300;
-    view.animate(distance, time);
 }
 
 function SwipeView(selector, slideWidth, slideHeight) {
@@ -315,6 +309,26 @@ SwipeView.prototype.isFlicked = function (event) {
     return getSpeed(event) > 1;
 };
 
+SwipeView.prototype.handleTouchMove = function (event) {
+    if (this.canSlideLeft(event) || this.canSlideRight(event)) {
+        var distance = -(event.slideIndex * this.slideWidth) + event.displacement;
+        return { type: "move", distance: distance };
+    } else if (this.isPullingEdge(event)) {
+        var distance = -(event.slideIndex * this.slideWidth) + this.edgePadding / this.slideWidth * event.displacement;
+        return { type: "move", distance: distance };
+    }
+};
+
+SwipeView.prototype.handleTouchEnd = function (event) {
+    if (this.hasCrossedMidPoint(event) || this.isFlicked(event)) {
+        if (this.canSlideRight(event)) event.slideIndex++;else if (this.canSlideLeft(event)) event.slideIndex--;
+    }
+
+    var distance = -(event.slideIndex * this.slideWidth);
+    var time = this.isFlicked(event) ? 150 : 300;
+    return { type: "animate", distance: distance, time: time };
+};
+
 SwipeView.prototype.animate = function (translateX, ms) {
     this.slider.style["transition"] = "transform " + ms + "ms ease-out";
     this.slider.style["transform"] = "translate3d(" + translateX + "px, 0, 0)";
@@ -333,4 +347,4 @@ function getPageX(event) {
     return event.type == "touchend" ? event.changedTouches[0].pageX : event.targetTouches[0].pageX;
 }
 
-},{"frpjs":1,"frpjs/dom":2}]},{},[3]);
+},{"frpjs":2,"frpjs/dom":3}]},{},[1]);
