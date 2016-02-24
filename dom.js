@@ -47,4 +47,12 @@ DOM.onTouchEnd = function(selector, useCapture) {
     return DOM.createEventStream(selector, 'touchend', !!useCapture)
 }
 
+DOM.addClass = function(element, className) {
+    element.classList.add(className)
+}
+
+DOM.removeClass = function(element, className) {
+    element.classList.remove(className)
+}
+
 export default DOM
