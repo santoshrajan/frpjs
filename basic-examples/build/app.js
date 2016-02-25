@@ -184,10 +184,20 @@ DOM.onTouchEnd = function (selector, useCapture) {
     return DOM.createEventStream(selector, 'touchend', !!useCapture);
 };
 
+DOM.addClass = function (element, className) {
+    element.classList.add(className);
+};
+
+DOM.removeClass = function (element, className) {
+    element.classList.remove(className);
+};
+
 exports.default = DOM;
 
 },{}],3:[function(require,module,exports){
 'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _frpjs = require('frpjs');
 
@@ -303,7 +313,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     })();
 }
 
-// Example 8: Add
+// Example 8: Add two numbers
 {
     (function () {
         var input1$ = _frpjs2.default.compose(_dom2.default.createEventStream('#ex8-input1', 'input'), _frpjs2.default.map(function (event) {
@@ -323,6 +333,86 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
         inputs$(function (input) {
             return _dom2.default.select('#ex8-label').textContent = _frpjs2.default.snapshot(totalValue);
+        });
+    })();
+}
+
+// Example 9: Form validation
+{
+    (function () {
+        var allValidationsPassed = function allValidationsPassed(events) {
+            var validations = [];
+            for (var key in events) {
+                if (_typeof(events[key]) == "object") validations.push(events[key].valid);
+            }
+            return validations.length == 3 && validations.reduce(function (a, b) {
+                return a && b;
+            });
+        };
+
+        // Input stream
+
+
+        // Validation functions
+        var validators = {
+            "name": function name(value) {
+                var name = value.trim();
+
+                if (name.length == 0) return "Required";
+                if (/([^A-Za-z\s])/.test(name)) return "Cannot contains special characters";
+                if (name.indexOf(' ') < 0) return "Please enter your full name";
+                return "";
+            },
+
+            "quantity": function quantity(value) {
+                var number = parseInt(value);
+
+                if (number < 1 || number > 3) return "Choose a number between 1 and 3";
+                return "";
+            },
+
+            "email": function email(value) {
+                var email = value.trim();
+
+                if (/\S+@\S+\.\S+/.test(email)) return "";
+                return "Please enter a valid email address";
+            }
+        };
+
+        var inputs$ = _frpjs2.default.compose(_dom2.default.createEventStream('#name', 'input'), _frpjs2.default.merge(_dom2.default.createEventStream('#email', 'change')), _frpjs2.default.merge(_dom2.default.createEventStream('#quantity', 'input')), _frpjs2.default.map(function (event) {
+            return {
+                element: event.target,
+                name: event.target.name,
+                value: event.target.value,
+                validator: validators[event.target.name]
+            };
+        }), _frpjs2.default.map(function (event) {
+            event.errorMessage = event.validator(event.value), event.valid = event.errorMessage == "" ? true : false;
+
+            return event;
+        }), _frpjs2.default.fold(function (accumulator, currentEvent) {
+            accumulator[currentEvent.name] = currentEvent;
+            accumulator.current = currentEvent.name;
+            accumulator.allValid = allValidationsPassed(accumulator);
+
+            return accumulator;
+        }, {}));
+
+        // Activation
+        inputs$(function (events) {
+            var currentEvent = events[events.current];
+            var formGroupElement = currentEvent.element.parentElement;
+            var errorSpanElement = currentEvent.element.nextElementSibling;
+
+            if (currentEvent.valid == false) {
+                _dom2.default.addClass(formGroupElement, 'has-error');
+                errorSpanElement.textContent = currentEvent.errorMessage;
+            } else {
+                _dom2.default.removeClass(formGroupElement, 'has-error');
+                errorSpanElement.textContent = "";
+            }
+
+            _dom2.default.select('#submit').disabled = !events.allValid;
         });
     })();
 }
