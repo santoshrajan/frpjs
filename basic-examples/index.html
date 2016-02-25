@@ -244,6 +244,112 @@ inputs$(input =>
     </div>
   </div>
 
+  <!-- Example 9 -->
+  <div class="row">
+    <h3 class="col-md-12">Form validation</h3>
+    <div class="col-md-7">
+
+<pre>
+// Helpers for validating input
+// Returns an error message if validation fails
+const validators = {
+    "name": function(value) { ... },
+    "quantity": function(value) { ... },
+    "email": function(value) { ... }
+ }
+
+// Helper for verifying if all inputs are valid 
+function allValidationsPassed(events) {
+    let validations = []
+    for(let key in events) {
+        if (typeof events[key] == "object")
+            validations.push(events[key].valid)
+    }
+    return validations.length == 3 &&
+           validations.reduce((a, b) => a && b)
+}
+
+// Input stream
+const inputs$ = frp.compose(
+    // Merge the input streams
+    $.createEventStream('#name', 'input'),
+    frp.merge($.createEventStream('#email', 'change')),
+    frp.merge($.createEventStream('#quantity', 'input')),
+
+    // Pull out the element, name, value and assign a validator
+    frp.map(event => ({
+        element: event.target,
+        name: event.target.name,
+        value: event.target.value,
+        validator: validators[event.target.name]
+    })),
+
+    // Run the validator on the input value
+    frp.map(event => {
+        event.errorMessage = event.validator(event.value),
+        event.valid = (event.errorMessage == "") ? true : false
+
+        return event
+    }),
+
+    // Fold all events, keep track of the current event
+    // and check if all validations have passed
+    frp.fold((accumulator, currentEvent) => {
+        accumulator[currentEvent.name] = currentEvent
+        accumulator.current = currentEvent.name
+        accumulator.allValid = allValidationsPassed(accumulator)
+
+        return accumulator
+    }, {})
+)
+
+// Activation
+inputs$(events => {
+    // Show/hide the error message
+    const currentEvent     = events[events.current]
+    const formGroupElement = currentEvent.element.parentElement
+    const errorSpanElement = currentEvent.element.nextElementSibling
+
+    if (currentEvent.valid == false) {
+        $.addClass(formGroupElement, 'has-error')
+        errorSpanElement.textContent = currentEvent.errorMessage
+    } else {
+        $.removeClass(formGroupElement, 'has-error')
+        errorSpanElement.textContent = ""
+    }
+
+    // Enable/disable the submit button
+    $.select('#submit').disabled = !events.allValid
+})</pre>
+
+    </div>
+    <div class="col-md-3">
+      <form autocomplete="off">
+
+        <div class="form-group">
+          <label class="control-label" for="name">Name</label>
+          <input type="text" class="form-control" name="name" id="name" placeholder="Full name">
+          <span class="help-block"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label" for="email">Email</label>
+          <input type="email" class="form-control" name="email" id="email" placeholder="you@domain.com">
+          <span class="help-block"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label" for="quantity">Quantity</label>
+          <input type="number" class="form-control" name="quantity" id="quantity" value="1">
+          <span class="help-block"></span>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="submit" disabled>Submit</button>
+
+      </form>
+    </div>
+  </div>
+
 </div>
 
 <script src="build/app.js"></script>
