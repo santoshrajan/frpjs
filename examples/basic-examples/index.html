@@ -33,7 +33,12 @@ clear$(text => dom.select('#ex1-input').value = text)</pre>
         </div>
       </form>
     </div>
-  </div>         
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <img src="images/ex1.png">
+    </div>
+  </div>       
 
   <!-- Example 2 -->
   <div class="row">
@@ -136,6 +141,11 @@ count$(count => dom.select('#ex5-label').textContent = count)</pre>
           <label id="ex5-label" style="padding-left: 10px">0</label>
         </div>
       </form>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <img src="images/ex5.png">
     </div>
   </div>
 
@@ -253,10 +263,34 @@ inputs$(input =>
 // Helpers for validating input
 // Returns an error message if validation fails
 const validators = {
-    "name": function(value) { ... },
-    "quantity": function(value) { ... },
-    "email": function(value) { ... }
- }
+    "name": function(value) {
+        const name = value.trim()
+
+        if (name.length == 0)
+            return "Required"
+        if (/([^A-Za-z\s])/.test(name))
+            return "Cannot contains special characters"
+        if (name.indexOf(' ') < 0)
+            return "Please enter your full name"
+        return ""
+    },
+
+    "quantity": function(value) {
+        const number = parseInt(value)
+
+        if (number < 1 || number > 3)
+            return "Choose a number between 1 and 3"
+        return ""
+    },
+
+    "email": function(value) {
+        const email = value.trim()
+
+        if (/\S+@\S+\.\S+/.test(email))
+            return ""
+        return "Please enter a valid email address"
+    }
+}
 
 // Helper for verifying if all inputs are valid 
 function allValidationsPassed(events) {
