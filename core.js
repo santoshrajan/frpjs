@@ -108,4 +108,21 @@ FRP.throttle = function(eventStream, ms) {
     })
 }
 
+FRP.hub = function(eventStream) {
+    return function(eventStream) {
+        var nexts = []
+        var isStarted = false
+
+        return (function(next) {
+            nexts.push(next)
+            if (!isStarted) {
+                eventStream(function(value) {
+                    nexts.forEach(function(next) {next(value)})
+                })
+                isStarted = true
+            }
+        })        
+    }
+}
+
 export default FRP
