@@ -124,7 +124,24 @@ import dom from 'frpjs/dom'
     inputs$(input => dom.select('#ex8-label').textContent = frp.snapshot(totalValue))
 }
 
-// Example 9: Form validation
+// Example 9: Hub
+{
+    const prices = Array.from(dom.selectAll('.price'))
+    const totals = Array.from(dom.selectAll('.total'))
+
+    const vat$ = frp.compose(
+        dom.createEventStream('#vat', 'change'),
+        frp.map(event => 1 + (event.target.value / 100)),
+        frp.hub()
+    )
+
+    totals.forEach(function(total, i) {
+        const price = Number(prices[i].textContent)
+        vat$(factor => total.textContent = (price * factor).toFixed(2))  
+    })
+}
+
+// Example 10: Form validation
 {
     // Validation functions
     const validators = {

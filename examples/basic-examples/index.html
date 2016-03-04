@@ -7,6 +7,21 @@
   <title>Basic Examples</title>
 
   <link rel="stylesheet" href="./styles/bootstrap.min.css">
+  <style>
+    #vat-cell {
+        padding: 0px;
+        border: 0px;
+        width: 75px;
+    }
+
+    #vat-cell input {
+        border: 0px;
+        border-radius: 0px;
+        height: 36px;
+        display: inline-block;
+        background-color: #faebcc;
+    }
+  </style>
 </head>
 <body>
 
@@ -260,6 +275,68 @@ inputs$(input =>
   </div>
 
   <!-- Example 9 -->
+  <div class="row">
+    <h3 class="col-md-12">Hub</h3>
+    <div class="col-md-7">
+
+<pre>const prices = Array.from(dom.selectAll('.price'))
+const totals = Array.from(dom.selectAll('.total'))
+
+const vat$ = frp.compose(
+    dom.createEventStream('#vat', 'change'),
+    frp.map(event => 1 + (event.target.value / 100)),
+    frp.hub()
+)
+
+totals.forEach(function(total, i) {
+    const price = Number(prices[i].textContent)
+    vat$(factor => total.textContent = (price * factor).toFixed(2))  
+})</pre>
+
+    </div>
+    <div class="col-md-3">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Prices</th>
+              <th>VAT(%)</th>
+              <th>Totals</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="price">430</td>
+              <td id="vat-cell">
+                <input type="number" class="form-control" id="vat" value="10">
+              </td>
+              <td class="total">473.00</td>
+            </tr>
+            <tr>
+              <td class="price">375</td>
+              <td></td>
+              <td class="total">412.50</td>
+            </tr>
+            <tr>
+              <td class="price">120</td>
+              <td></td>
+              <td class="total">132.00</td>
+            </tr>
+            <tr>
+              <td class="price">250</td>
+              <td></td>
+              <td class="total">275.00</td>
+            </tr>
+            <tr>
+              <td class="price">215</td>
+              <td></td>
+              <td class="total">236.50</td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+  </div>
+
+  <!-- Example 10 -->
   <div class="row">
     <h3 class="col-md-12">Form validation</h3>
     <div class="col-md-7">
