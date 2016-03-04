@@ -96,7 +96,7 @@ FRP.liftN = function(combine, ...behaviors) {
 }
 
 FRP.throttle = function(eventStream, ms) {
-    return (function(next) {
+    return function(next) {
         let last = 0
         eventStream(function(value) {
             let now = performance.now()
@@ -105,15 +105,15 @@ FRP.throttle = function(eventStream, ms) {
                 last = now
             }
         })
-    })
+    }
 }
 
-FRP.hub = function(eventStream) {
+FRP.hub = function() {
     return function(eventStream) {
         var nexts = []
         var isStarted = false
 
-        return (function(next) {
+        return function(next) {
             nexts.push(next)
             if (!isStarted) {
                 eventStream(function(value) {
@@ -121,7 +121,7 @@ FRP.hub = function(eventStream) {
                 })
                 isStarted = true
             }
-        })        
+        }
     }
 }
 
