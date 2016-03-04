@@ -127,6 +127,25 @@ FRP.throttle = function (eventStream, ms) {
     };
 };
 
+FRP.hub = function () {
+    return function (eventStream) {
+        var nexts = [];
+        var isStarted = false;
+
+        return function (next) {
+            nexts.push(next);
+            if (!isStarted) {
+                eventStream(function (value) {
+                    nexts.forEach(function (next) {
+                        next(value);
+                    });
+                });
+                isStarted = true;
+            }
+        };
+    };
+};
+
 exports.default = FRP;
 
 },{}],2:[function(require,module,exports){
@@ -337,7 +356,26 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     })();
 }
 
-// Example 9: Form validation
+// Example 9: Hub
+{
+    (function () {
+        var prices = Array.from(_dom2.default.selectAll('.price'));
+        var totals = Array.from(_dom2.default.selectAll('.total'));
+
+        var vat$ = _frpjs2.default.compose(_dom2.default.createEventStream('#vat', 'change'), _frpjs2.default.map(function (event) {
+            return 1 + event.target.value / 100;
+        }), _frpjs2.default.hub());
+
+        totals.forEach(function (total, i) {
+            var price = Number(prices[i].textContent);
+            vat$(function (factor) {
+                return total.textContent = (price * factor).toFixed(2);
+            });
+        });
+    })();
+}
+
+// Example 10: Form validation
 {
     (function () {
         var allValidationsPassed = function allValidationsPassed(events) {
