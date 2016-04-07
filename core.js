@@ -22,7 +22,7 @@ FRP.bind = function(valueToEvent) {
     }
 }
 
-FRP.filter = function(predicate) { 
+FRP.filter = function(predicate) {
     return function(eventStream) {
         return function(next) {
             eventStream(function(value) {
@@ -69,7 +69,7 @@ FRP.compose = function(eventStream, ...operations) {
     return FRP.compose(operation(eventStream), ...operations)
 }
 
-FRP.stepper = function (eventStream, initial) {
+FRP.stepper = function(eventStream, initial) {
     let valueAtLastStep = initial
 
     eventStream(function nextStep(value) {
